@@ -16,3 +16,19 @@ Link to FE PR (YOUR OWN REPOSITORY) -  https://github.com/Kotlinski95/shop-angul
 Link to FE page: https://dszbsd7gyif70.cloudfront.net/
 
 Product schema: everything is located in the product.json file.
+
+##### Task 4 (Integration with NoSQL Database) #####
+Task 4.1:
+- Script to fill dynamo DB data: fill-dynamo-db.js
+- Execute script using node fill-dynamo-db.js
+
+Task 4.2
+-Lambda functions for getting all products and productById updated.
+
+Task 4.3
+- Lambda function createProduct created
+
+Task 4 Additional work:
+- Error 400 added when product data are invalid
+- All lambdas return error 500 code on any error (DB connection, any unhandled error in code)
+-  All lambdas do console.log for each incoming requests and their arguments
