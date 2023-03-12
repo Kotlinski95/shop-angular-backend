@@ -21,8 +21,9 @@ service: product-service
 frameworkVersion: '3'
 
 provider:
-  name: aws
-  runtime: nodejs12.x
+    name: aws
+    runtime: nodejs16.x
+    region: us-east-1
 
 # you can overwrite defaults here
 #  stage: dev
@@ -59,25 +60,58 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  getProductsList:
-    handler: handler.getProductsList
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-    events:
-      - http:
-          path: products
-          method: get
+    getProductsList:
+        handler: handler.getProductsList
+        environment:
+            PRODUCTS_TABLE_NAME: products
+            STOCKS_TABLE_NAME: stocks
+        #    The following are a few example events you can configure
+        #    NOTE: Please make sure to change your handler code to work with those events
+        #    Check the event documentation for details
+        events:
+            - http:
+                  path: products
+                  method: get
+                  cors: true
 
-  getProductsById:
-    handler: handler.getProductsById
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-    events:
-      - http:
-          path: products/{productId}
-          method: get
+    getProductsById:
+        handler: handler.getProductsById
+        environment:
+            PRODUCTS_TABLE_NAME: products
+            STOCKS_TABLE_NAME: stocks
+        #    The following are a few example events you can configure
+        #    NOTE: Please make sure to change your handler code to work with those events
+        #    Check the event documentation for details
+        events:
+            - http:
+                  path: products/{productId}
+                  method: get
+                  cors: true
+
+    createProduct:
+        handler: handler.createProduct
+        environment:
+            PRODUCTS_TABLE_NAME: products
+            STOCKS_TABLE_NAME: stocks
+        #    The following are a few example events you can configure
+        #    NOTE: Please make sure to change your handler code to work with those events
+        #    Check the event documentation for details
+        events:
+            - http:
+                  path: products
+                  method: post
+                  cors: true
+
+    # getProductsDb:
+    #     handler: dynamodb.getProductsListDb
+    #     environment:
+    #         PRODUCTS_TABLE_NAME: products
+    #         STOCKS_TABLE_NAME: stocks
+    #     events:
+    #         - http:
+    #               path: productsdb
+    #               method: GET
+    #               cors: true
 #    events:
 #      - httpApi:
 #          path: /users/create
@@ -116,13 +150,29 @@ functions:
 #      variable2: value2
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+resources:
+    Resources:
+        MyFunctionRole:
+            Type: AWS::IAM::Role
+            Properties:
+                RoleName: MyFunctionRole
+                AssumeRolePolicyDocument:
+                    Version: '2012-10-17'
+                    Statement:
+                        - Effect: Allow
+                          Principal:
+                              Service:
+                                  - lambda.amazonaws.com
+                          Action:
+                              - sts:AssumeRole
+                Policies:
+                    - PolicyName: DynamoDBAccess
+                      PolicyDocument:
+                          Version: '2012-10-17'
+                          Statement:
+                              - Effect: Allow
+                                Action:
+                                    - dynamodb:*
+                                Resource:
+                                    - arn:aws:dynamodb:us-east-1:818211481183:table/products
+                                    - arn:aws:dynamodb:us-east-1:818211481183:table/stocks

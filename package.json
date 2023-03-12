@@ -1,4 +1,8 @@
 {
+  "name": "aws-angular-shop-backend",
+  "scripts": {
+    "deploy": "cd ./product-service && sls deploy"
+  },
   "dependencies": {
     "fs": "^0.0.1-security"
   }
