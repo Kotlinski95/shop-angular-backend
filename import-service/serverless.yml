@@ -25,14 +25,6 @@ provider:
   runtime: nodejs12.x
   stage: dev
   lambdaHashingVersion: 20201221
-  cors:
-  origins:
-    - '*'
-  headers:
-    - '*'
-  methods:
-    - 'OPTIONS'
-    - 'PUT'
 
 # you can overwrite defaults here
 #  stage: dev
@@ -90,7 +82,7 @@ functions:
               querystrings:
                 name: true
   importFileParser:
-    handler: handler.importFileParser
+    handler: parser.importFileParser
     events:
       - s3:
           bucket: aws-angular-shop-bucket-s3
