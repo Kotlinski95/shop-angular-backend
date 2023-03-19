@@ -51,6 +51,11 @@ provider:
         - "s3:GetObject"
       Resource:
         - "arn:aws:s3:::aws-angular-shop-bucket-s3/*"
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource:
+        - "arn:aws:sqs:us-east-1:818211481183:catalog-items-queue"
 #            Fn::Join:
 #              - ""
 #              - - "arn:aws:s3:::"
@@ -90,6 +95,13 @@ functions:
           rules:
             - prefix: uploaded/
           existing: true
+  # catalogBatchProcess:
+  #   handler: catalogBatchProcess.handler
+  #   events:
+  #     - sqs:
+  #         arn: arn:aws:sqs:us-east-1:818211481183:catalog-items-queue
+  #         batchSize: 5
+  #         maximumBatchingWindow: 60
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -141,3 +153,10 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+resources:
+    Resources:
+        catalogItemsQueue:
+            Type: "AWS::SQS::Queue"
+            Properties:
+                QueueName: catalog-items-queue

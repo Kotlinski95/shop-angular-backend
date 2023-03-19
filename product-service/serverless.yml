@@ -46,6 +46,30 @@ provider:
 #              - - "arn:aws:s3:::"
 #                - "Ref" : "ServerlessDeploymentBucket"
 #                - "/*"
+    iamRoleStatements:
+        - Effect: "Allow"
+          Action: "s3:PutObject"
+          Resource:
+            - "arn:aws:s3:::aws-angular-shop-bucket-s3/uploaded/*"
+        - Effect: "Allow"
+          Action: "s3:GetObject"
+          Resource:
+            - "arn:aws:s3:::aws-angular-shop-bucket-s3/*"
+        - Effect: "Allow"
+          Action: "sqs:*"
+          Resource:
+            - "arn:aws:sqs:us-east-1:818211481183:catalog-items-queue"
+        - Effect: "Allow"
+          Action:
+            - "sns:*"
+          Resource:
+            Ref: createProductTopic
+        - Effect: "Allow"
+          Action:
+            - "sns:*"
+          Resource:
+            Ref: createProductTopicEmailSubscription
+
 
 # you can define service wide environment variables here
 #  environment:
@@ -101,7 +125,16 @@ functions:
                   path: products
                   method: post
                   cors: true
-
+    catalogBatchProcess:
+        handler: catalogBatchProcess.handler
+        environment:
+            PRODUCTS_TABLE_NAME: products
+            STOCKS_TABLE_NAME: stocks
+        events:
+            - sqs:
+                arn: arn:aws:sqs:us-east-1:818211481183:catalog-items-queue
+                batchSize: 5
+                maximumBatchingWindow: 60
     # getProductsDb:
     #     handler: dynamodb.getProductsListDb
     #     environment:
@@ -176,3 +209,19 @@ resources:
                                 Resource:
                                     - arn:aws:dynamodb:us-east-1:818211481183:table/products
                                     - arn:aws:dynamodb:us-east-1:818211481183:table/stocks
+        createProductTopic:
+            Type: AWS::SNS::Topic
+            Properties:
+                TopicName: create-product-topic
+
+        createProductTopicEmailSubscription:
+            Type: AWS::SNS::Subscription
+            Properties:
+                Protocol: email
+                TopicArn:
+                    Ref: createProductTopic
+                Endpoint: kotlinski95@gmail.com
+        # catalogItemsQueue:
+        #     Type: "AWS::SQS::Queue"
+        #     Properties:
+        #         QueueName: catalog-items-queue
