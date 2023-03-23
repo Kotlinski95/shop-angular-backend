@@ -1,12 +1,20 @@
 {
   "name": "aws-angular-shop-backend",
   "scripts": {
-    "deploy": "cd ./product-service && sls deploy"
+    "deploy-product": "cd ./product-service && sls deploy",
+    "test": "jest --watch"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.294.0",
+    "@aws-sdk/client-sqs": "^3.294.0",
     "aws-sdk": "^2.1333.0",
     "csv-parse": "^5.3.6",
     "csv-parser": "^3.0.0",
     "fs": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "aws-sdk-mock": "^5.8.0",
+    "jest": "^29.5.0"
   }
 }
