@@ -5,7 +5,13 @@ provider:
   name: aws
   runtime: nodejs12.x
   stage: dev
+  region: us-east-1
   lambdaHashingVersion: 20201221
+
+  httpApi:
+    cors: true
+  logs:
+    httpApi: true
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -22,6 +28,17 @@ provider:
         - "sqs:*"
       Resource:
         - "arn:aws:sqs:us-east-1:818211481183:catalog-items-queue"
+    - Effect: Allow
+      Action:
+        - execute-api:Invoke
+      Resource:
+        - "arn:aws:execute-api:us-east-1:818211481183:da5x4n22he/dev/*/*"
+    - Effect: Allow
+      Action:
+        - execute-api:Invoke
+      Resource:
+        - "arn:aws:execute-api:us-east-1:818211481183:vsdtk4z9ij/dev/*/*"
+
 
 functions:
   importProductsFile:
@@ -30,6 +47,9 @@ functions:
     - http:
         method: get
         path: import
+        authorizer:
+          type: token
+          arn: arn:aws:lambda:us-east-1:818211481183:function:authorization-service-dev-basicAuthorizer
         cors: true
         request:
             parameters:
@@ -51,3 +71,27 @@ resources:
             Type: "AWS::SQS::Queue"
             Properties:
                 QueueName: catalog-items-queue
+        AuthorizerApiGatewayResponse:
+          Type: "AWS::ApiGateway::GatewayResponse"
+          Properties:
+            ResponseParameters:
+              "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+            ResponseType: UNAUTHORIZED
+            RestApiId: vsdtk4z9ij
+            StatusCode: "401"
+        Unauthorized:
+          Type: AWS::ApiGateway::GatewayResponse
+          Properties:
+            ResponseParameters:
+              "gatewayresponse.header.Access-Control-Allow-Origin": "'*'"
+              "gatewayresponse.header.Access-Control-Allow-Headers": "'*'"
+            ResponseType: "DEFAULT_4XX"
+            RestApiId:
+              Ref: "ApiGatewayRestApi"
+        ApiGatewayRestApi:
+          Type: AWS::ApiGateway::RestApi
+          Properties:
+            Name: dev-authorization-service
+            Description: My API description
+plugins:
+  - serverless-dotenv-plugin
